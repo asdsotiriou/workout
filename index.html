@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Workout · ASD</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f1117;
+    color: #e8eaf0;
+    min-height: 100vh;
+    padding: 12px;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  .header {
+    background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%);
+    border: 1px solid #2a3044;
+    border-radius: 16px;
+    padding: 18px 16px 14px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .header h1 { font-size: 20px; font-weight: 700; color: #f0f2ff; }
+  .header p { font-size: 12px; color: #6b7280; margin-top: 4px; }
+  .week-nav {
+    display: flex; gap: 6px; margin-bottom: 12px;
+    overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;
+  }
+  .week-nav::-webkit-scrollbar { display: none; }
+  .day-tab {
+    flex: 0 0 auto; padding: 8px 10px; border-radius: 10px;
+    border: 1px solid #2a3044; background: #1a1f2e; color: #8892aa;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; white-space: nowrap; text-align: center; min-width: 66px;
+  }
+  .day-tab:hover { border-color: #4f6ef7; color: #c0c8e8; }
+  .day-tab.active { background: linear-gradient(135deg,#3b5bdb,#4f6ef7); border-color: #4f6ef7; color: #fff; }
+  .day-tab.active.walk { background: linear-gradient(135deg,#065f46,#059669); border-color: #10b981; }
+  .day-tab.active.rest { background: linear-gradient(135deg,#2d3748,#374151); border-color: #4b5563; }
+  .day-tab .dl { font-size: 10px; display: block; opacity: 0.7; }
+  .day-tab .dn { font-size: 14px; display: block; }
+  .day-content { display: none; }
+  .day-content.active { display: block; }
+  .day-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 20px; font-size: 12px;
+    font-weight: 600; margin-bottom: 12px;
+  }
+  .bw { background:#1e3a8a22; border:1px solid #3b5bdb44; color:#7c9ef7; }
+  .bg { background:#064e3b22; border:1px solid #059669; color:#34d399; }
+  .br { background:#1f2937; border:1px solid #374151; color:#6b7280; }
+  .sec {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: #4f6ef7; margin: 14px 0 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .sec::after { content:''; flex:1; height:1px; background:#2a3044; }
+  .ex-card {
+    background: #1a1f2e; border: 1px solid #2a3044; border-radius: 12px;
+    padding: 12px 14px; margin-bottom: 8px; display: flex;
+    align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s;
+  }
+  .ex-card:hover { border-color:#4f6ef7; background:#1e2440; }
+  .ex-card.done { border-color:#059669; background:#064e3b15; opacity:0.7; }
+  .ex-icon {
+    width:40px; height:40px; border-radius:10px; background:#0f1117;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; flex-shrink:0;
+  }
+  .ex-info { flex:1; min-width:0; }
+  .ex-name { font-size:14px; font-weight:600; color:#e8eaf0; }
+  .ex-sets { font-size:12px; color:#6b7280; margin-top:2px; }
+  .tag {
+    display:inline-block; padding:2px 7px; border-radius:6px;
+    font-size:10px; font-weight:600; margin-left:6px; vertical-align:middle;
+  }
+  .tb { background:#1e3a8a22; color:#7c9ef7; border:1px solid #3b5bdb33; }
+  .tk { background:#78350f22; color:#f59e0b; border:1px solid #d9770633; }
+  .tw { background:#1e1b4b22; color:#a78bfa; border:1px solid #7c3aed33; }
+  .ex-chk {
+    width:22px; height:22px; border-radius:50%;
+    border:2px solid #374151; display:flex; align-items:center;
+    justify-content:center; flex-shrink:0; font-size:12px;
+    transition:all 0.2s; color:transparent;
+  }
+  .ex-card.done .ex-chk { background:#059669; border-color:#059669; color:#fff; }
+  .prog-wrap {
+    background:#1a1f2e; border:1px solid #2a3044; border-radius:12px;
+    padding:12px 14px; margin-bottom:12px;
+  }
+  .prog-lbl { display:flex; justify-content:space-between; font-size:12px; color:#8892aa; margin-bottom:8px; }
+  .prog-lbl span:last-child { color:#4f6ef7; font-weight:600; }
+  .prog-bar { height:6px; background:#0f1117; border-radius:3px; overflow:hidden; }
+  .prog-fill { height:100%; background:linear-gradient(90deg,#3b5bdb,#06b6d4); border-radius:3px; transition:width 0.4s; }
+  .ibox {
+    background:#1a1f2e; border:1px solid #2a3044; border-radius:12px;
+    padding:14px; margin-bottom:8px;
+  }
+  .ibox h3 { font-size:14px; font-weight:600; color:#e8eaf0; margin-bottom:8px; }
+  .ibox p,.ibox li { font-size:13px; color:#8892aa; line-height:1.6; }
+  .ibox ul { list-style:none; }
+  .ibox li { padding:3px 0; display:flex; gap:6px; }
+  .ibox li::before { content:'→'; color:#4f6ef7; flex-shrink:0; }
+  .walk-card {
+    background:#064e3b15; border:1px solid #059669; border-radius:12px;
+    padding:18px; margin-bottom:10px; text-align:center;
+  }
+  .walk-card .wi { font-size:40px; margin-bottom:8px; }
+  .walk-card h3 { font-size:16px; font-weight:700; color:#34d399; }
+  .walk-card p { font-size:13px; color:#6ee7b7; margin-top:6px; line-height:1.5; }
+  .rest-card {
+    background:#111827; border:1px solid #1f2937; border-radius:12px;
+    padding:24px; text-align:center;
+  }
+  .rest-card .ri { font-size:40px; margin-bottom:10px; }
+  .rest-card h3 { font-size:16px; font-weight:600; color:#6b7280; }
+  .rest-card p { font-size:13px; color:#4b5563; margin-top:6px; }
+  .tip {
+    background:#1e1b4b18; border:1px solid #4f46e522;
+    border-radius:10px; padding:10px 12px; margin-top:10px;
+  }
+  .tip p { font-size:12px; color:#8b7cf8; line-height:1.5; }
+  .tip strong { color:#a78bfa; }
+  .reset-btn {
+    display:block; width:100%; padding:10px; border-radius:10px;
+    border:1px solid #2a3044; background:#1a1f2e; color:#6b7280;
+    font-size:12px; cursor:pointer; margin-top:12px; transition:all 0.2s;
+  }
+  .reset-btn:hover { border-color:#4f6ef7; color:#7c9ef7; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏋️ Home Workout Plan</h1>
+  <p>Crossfit-style · Κοπηλατική · Garmin Tacx · Βαράκια 5kg</p>
+</div>
+
+<div class="week-nav" id="nav"></div>
+<div id="contents"></div>
+
+<script>
+const days = [
+  { lbl:"ΔΕΥ", em:"💪", type:"workout", theme:"Strength + Core",
+    exercises:[
+      {ic:"🚴",nm:"Tacx Warm-up",st:"10 λεπτά · Zone 2 (ζεστάμα)",tg:"tb"},
+      {ic:"💪",nm:"Push-ups",st:"4 σετ × 15 επαν. (ή max)",tg:"tw"},
+      {ic:"🏋️",nm:"Dumbbell Row (5kg)",st:"4 σετ × 12 επαν. ανά χέρι",tg:"tk"},
+      {ic:"🦵",nm:"Goblet Squat (5kg)",st:"4 σετ × 15 επαν.",tg:"tk"},
+      {ic:"🧘",nm:"Plank",st:"4 σετ × 45–60 δευτ.",tg:"tw"},
+      {ic:"🏋️",nm:"Shoulder Press (5kg)",st:"3 σετ × 12 επαν.",tg:"tk"},
+      {ic:"🔥",nm:"Burpees",st:"3 σετ × 10 επαν.",tg:"tw"},
+    ]},
+  { lbl:"ΤΡΙ", em:"🚶", type:"walk", theme:"Cardio Walk",
+    wt:"Βόλτα Τρίτης",
+    wp:"30–45 λεπτά γρήγορο περπάτημα.<br>Ρυθμός: να αισθάνεσαι λίγο κόπωμα αλλά να μπορείς να μιλάς." },
+  { lbl:"ΤΕΤ", em:"🚣", type:"workout", theme:"Cardio + Metcon",
+    exercises:[
+      {ic:"🚣",nm:"Κοπηλατική Warm-up",st:"5 λεπτά · ελαφρύ ρυθμό",tg:"tb"},
+      {ic:"🚣",nm:"Rowing Intervals",st:"6 × 250m · παύση 1 λεπτό",tg:"tb"},
+      {ic:"🦵",nm:"Jumping Lunges",st:"4 σετ × 20 επαν. (10 ανά πόδι)",tg:"tw"},
+      {ic:"💪",nm:"Diamond Push-ups",st:"3 σετ × 12 επαν.",tg:"tw"},
+      {ic:"🏋️",nm:"Dumbbell Deadlift (5kg×2)",st:"4 σετ × 15 επαν.",tg:"tk"},
+      {ic:"🔥",nm:"Mountain Climbers",st:"4 σετ × 30 δευτ.",tg:"tw"},
+      {ic:"🚴",nm:"Tacx Cool-down",st:"5 λεπτά · Zone 1",tg:"tb"},
+    ]},
+  { lbl:"ΠΕΜ", em:"😴", type:"rest", theme:"Ανάπαυση" },
+  { lbl:"ΠΑΡ", em:"🔥", type:"workout", theme:"Full Body + Power",
+    exercises:[
+      {ic:"🚴",nm:"Tacx Warm-up",st:"10 λεπτά · Zone 2",tg:"tb"},
+      {ic:"🦵",nm:"Air Squats",st:"4 σετ × 20 επαν.",tg:"tw"},
+      {ic:"💪",nm:"Push-up to T-Rotation",st:"3 σετ × 10 επαν.",tg:"tw"},
+      {ic:"🏋️",nm:"Curl + Press (5kg)",st:"3 σετ × 12 επαν.",tg:"tk"},
+      {ic:"🚣",nm:"Κοπηλατική Sprints",st:"5 × 500m · παύση 2 λεπτά",tg:"tb"},
+      {ic:"🧘",nm:"Side Plank",st:"3 σετ × 30 δευτ. ανά πλευρά",tg:"tw"},
+      {ic:"🔥",nm:"Box Step-ups (καρέκλα)",st:"3 σετ × 15 ανά πόδι",tg:"tw"},
+    ]},
+  { lbl:"ΣΑΒ", em:"🚶", type:"walk", theme:"Μεγάλη Βόλτα",
+    wt:"Μεγάλη Βόλτα ή Tacx",
+    wp:"45–60 λεπτά γρήγορο περπάτημα στη φύση ή παραλία.<br>Εναλλακτικά: 40 λεπτά Garmin Tacx Zone 2." },
+  { lbl:"ΚΥΡ", em:"😴", type:"rest", theme:"Ανάπαυση" },
+];
+
+const tlabels = {tb:"Cardio", tk:"Βαράκια", tw:"Bodyweight"};
+let done = {};
+
+function key(d,e){ return d+'-'+e; }
+
+function progress(didx, tot){
+  const n = Object.keys(done).filter(k=>k.startsWith(didx+'-')).length;
+  const pct = tot ? Math.round(n/tot*100) : 0;
+  return `<div class="prog-wrap">
+    <div class="prog-lbl"><span>Πρόοδος</span><span id="pl-${didx}">${n}/${tot}</span></div>
+    <div class="prog-bar"><div class="prog-fill" id="pf-${didx}" style="width:${pct}%"></div></div>
+  </div>`;
+}
+
+function buildWorkout(d, didx){
+  let h = `<div class="day-badge bw">💪 Προπόνηση &nbsp;·&nbsp; ${d.theme}</div>`;
+  h += progress(didx, d.exercises.length);
+  h += `<div class="sec">Ασκήσεις</div>`;
+  d.exercises.forEach((ex,ei)=>{
+    const k = key(didx,ei);
+    const isDone = !!done[k];
+    h += `<div class="ex-card${isDone?' done':''}" id="c-${k}" onclick="tog('${k}',${didx},${d.exercises.length})">
+      <div class="ex-icon">${ex.ic}</div>
+      <div class="ex-info">
+        <div class="ex-name">${ex.nm}<span class="tag ${ex.tg}">${tlabels[ex.tg]}</span></div>
+        <div class="ex-sets">${ex.st}</div>
+      </div>
+      <div class="ex-chk" id="ck-${k}">${isDone?'✓':''}</div>
+    </div>`;
+  });
+  h += `<div class="tip"><p><strong>💡 Tip:</strong> Ξεκούραση 60–90 δευτ. μεταξύ σετ. Αν το 5kg είναι εύκολο, μείωσε την παύση για να ανεβάσεις ένταση.</p></div>`;
+  h += `<button class="reset-btn" onclick="resetDay(${didx},${d.exercises.length})">↺ Επαναφορά ημέρας</button>`;
+  return h;
+}
+
+function buildWalk(d){
+  return `<div class="day-badge bg">🚶 Περπάτημα &nbsp;·&nbsp; ${d.theme}</div>
+    <div class="walk-card">
+      <div class="wi">🚶</div>
+      <h3>${d.wt}</h3>
+      <p>${d.wp}</p>
+    </div>
+    <div class="ibox">
+      <h3>📍 Ιδέες για διαδρομή</h3>
+      <ul>
+        <li>Παραλιακό μονοπάτι / Molos Λεμεσού</li>
+        <li>Γειτονιά με ανηφόρα για extra ένταση</li>
+        <li>Πάρκο ή φύση για αποφόρτιση</li>
+      </ul>
+    </div>`;
+}
+
+function buildRest(d){
+  return `<div class="day-badge br">😴 Ανάπαυση &nbsp;·&nbsp; ${d.theme}</div>
+    <div class="rest-card">
+      <div class="ri">💆</div>
+      <h3>Ημέρα Ανάπαυσης</h3>
+      <p>Αφήσε το σώμα να αποκατασταθεί.<br>Ελαφρύ stretching ή yoga αν θέλεις.</p>
+    </div>`;
+}
+
+function tog(k, didx, tot){
+  done[k] = !done[k];
+  document.getElementById('c-'+k).classList.toggle('done', done[k]);
+  document.getElementById('ck-'+k).textContent = done[k]?'✓':'';
+  updProg(didx, tot);
+}
+
+function updProg(didx, tot){
+  const n = Object.keys(done).filter(k=>k.startsWith(didx+'-') && done[k]).length;
+  const pct = tot ? Math.round(n/tot*100) : 0;
+  const pf = document.getElementById('pf-'+didx);
+  const pl = document.getElementById('pl-'+didx);
+  if(pf) pf.style.width = pct+'%';
+  if(pl) pl.textContent = n+'/'+tot;
+}
+
+function resetDay(didx, tot){
+  for(let i=0;i<tot;i++){
+    const k = key(didx,i);
+    delete done[k];
+    const c=document.getElementById('c-'+k);
+    const ck=document.getElementById('ck-'+k);
+    if(c) c.classList.remove('done');
+    if(ck) ck.textContent='';
+  }
+  updProg(didx, tot);
+}
+
+function showDay(idx){
+  document.querySelectorAll('.day-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  document.querySelectorAll('.day-content').forEach((c,i)=>c.classList.toggle('active',i===idx));
+}
+
+const nav = document.getElementById('nav');
+const contents = document.getElementById('contents');
+
+days.forEach((d,idx)=>{
+  const tab = document.createElement('div');
+  tab.className = 'day-tab'+(d.type==='walk'?' walk':d.type==='rest'?' rest':'');
+  tab.innerHTML = `<span class="dl">${d.lbl}</span><span class="dn">${d.em}</span>`;
+  tab.onclick = ()=>showDay(idx);
+  nav.appendChild(tab);
+
+  const cont = document.createElement('div');
+  cont.className = 'day-content';
+  if(d.type==='workout') cont.innerHTML = buildWorkout(d,idx);
+  else if(d.type==='walk') cont.innerHTML = buildWalk(d);
+  else cont.innerHTML = buildRest(d);
+  contents.appendChild(cont);
+});
+
+// Auto-select today
+const jsDay = new Date().getDay();
+const todayMap = [6,0,1,2,3,4,5];
+showDay(todayMap[jsDay] ?? 0);
+</script>
+</body>
+</html>
